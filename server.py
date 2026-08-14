@@ -38,14 +38,24 @@ HEADERS = {
     "Accept-Language": "pt-BR,pt;q=0.9",
 }
 CACHE_TTL = 90          # segundos entre uma raspagem e outra
-PORTA = 8000
-try:
-    _porta_env = int(os.environ.get("PORT", ""))
-    if 1 <= _porta_env <= 65535:
-        PORTA = _porta_env
-except ValueError:
-    pass
-HOST = os.environ.get("HOST", "127.0.0.1")
+
+
+def _porta_do_ambiente():
+    """Lê a variável PORT quando a plataforma injeta (Render, Railway etc.)."""
+    try:
+        p = int(os.environ.get("PORT", ""))
+        if 1 <= p <= 65535:
+            return p
+    except (TypeError, ValueError):
+        pass
+    return None
+
+
+_porta_env = _porta_do_ambiente()
+PORTA = _porta_env if _porta_env else 8000
+# Em plataforma (PORT injetada) escuta em todas as interfaces; localmente,
+# só em localhost — funciona mesmo sem HOST configurada no painel.
+HOST = os.environ.get("HOST", "0.0.0.0" if _porta_env else "127.0.0.1")
 PASTA_BASE = os.path.dirname(os.path.abspath(__file__))
 PASTA_PUBLIC = os.path.join(PASTA_BASE, "public")
 
