@@ -1,0 +1,16 @@
+# Blueprint do Render (https://render.com) — plano gratuito.
+# Após conectar este repositório no Render, ele cria o serviço com estas
+# configurações automaticamente. O histórico (dados/historico.json, ~3,7 MB)
+# já está no repositório, então não é preciso rodar o download no servidor.
+services:
+  - type: web
+    name: jogo-do-bicho-rj
+    runtime: python
+    plan: free
+    buildCommand: ""
+    startCommand: python server.py
+    healthCheckPath: /api/resultados
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      # PORT é injetada automaticamente pelo Render (ex.: 10000)

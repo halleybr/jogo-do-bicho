@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultados diários · Jogo do Bicho RJ</title>
+  <meta name="description" content="Resultados diários do Jogo do Bicho do Rio de Janeiro: consulte qualquer dia do arquivo (2021 → hoje) e busque por número ou bicho.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐒</text></svg>">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .nav-links { display: flex; gap: 8px; align-items: center; }
+    .nav-links a { text-decoration: none; white-space: nowrap; }
+    .controles {
+      display: flex; gap: 12px; align-items: end; justify-content: center;
+      flex-wrap: wrap; margin-bottom: 14px;
+    }
+    .controles .campo { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--texto-2); }
+    .controles input[type="date"] {
+      background: var(--cartao-2); color: var(--texto);
+      border: 1px solid var(--borda); border-radius: 10px;
+      padding: 9px 12px; font-size: 14px; font-family: inherit;
+    }
+    .dia-titulo { text-align: center; font-size: 18px; margin: 6px 0 4px; }
+    .dia-titulo b { color: var(--ouro); }
+    .dia-sub { text-align: center; color: var(--texto-2); font-size: 13px; margin-bottom: 20px; }
+    .busca-linha { margin: 0 auto 24px; }
+    .arquivo-item a { color: var(--texto); text-decoration: none; }
+    .arquivo-item a:hover { color: var(--destaque); }
+  </style>
+</head>
+<body>
+  <header class="topo">
+    <div class="topo-inner">
+      <a class="marca" href="/">
+        <span class="marca-emoji">🐒</span>
+        <span>
+          <strong>Jogo do Bicho RJ</strong>
+          <small>Resultados diários</small>
+        </span>
+      </a>
+      <div class="topo-acoes nav-links">
+        <a class="btn" href="/" title="Página inicial com busca e palpites">🔍 Pesquisar</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="conteudo">
+    <section class="busca-bloco">
+      <h1>Resultados diários</h1>
+      <p class="subtitulo">Consulte as apurações de qualquer dia do arquivo (2021 → hoje), navegue dia a dia e busque por milhar, dezena, grupo ou bicho dentro do dia.</p>
+      <div class="controles">
+        <div class="campo">
+          <label for="data">Data</label>
+          <input id="data" type="date" min="2021-01-02" max="2026-12-31">
+        </div>
+        <button id="btn-anterior" class="btn" title="Dia anterior">◀ Anterior</button>
+        <button id="btn-hoje" class="btn" title="Último dia com resultados">Hoje</button>
+        <button id="btn-proximo" class="btn" title="Próximo dia">Próximo ▶</button>
+      </div>
+      <div class="busca busca-linha">
+        <input id="busca-dia" type="search" placeholder="Buscar no dia: milhar, dezena, grupo ou bicho" autocomplete="off" spellcheck="false">
+      </div>
+      <div id="resumo-dia" class="resumo-busca" hidden></div>
+    </section>
+
+    <div id="erro" class="erro" hidden></div>
+
+    <p id="dia-titulo" class="dia-titulo"></p>
+    <p id="dia-sub" class="dia-sub"></p>
+    <div id="dia-grades" class="grades"></div>
+    <div id="sem-dados" class="sem-resultado" hidden></div>
+
+    <footer class="rodape">
+      <p>Os resultados são as apurações do <strong>Rio de Janeiro</strong> divulgadas pela imprensa e reunidas em <a href="https://www.ojogodobicho.com" target="_blank" rel="noopener">ojogodobicho.com</a>.</p>
+      <p>⚠️ O jogo do bicho <strong>não é regulamentado</strong> no Brasil (proibido por lei federal desde 1946). Este site é apenas informativo — não faz, intermedia nem incentiva apostas.</p>
+    </footer>
+  </main>
+
+  <script src="/diario.js"></script>
+</body>
+</html>

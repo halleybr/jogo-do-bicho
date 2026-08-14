@@ -1,0 +1,12 @@
+# Logs locais
+*.log
+servidor.err.log
+
+# Python
+__pycache__/
+*.pyc
+
+# Diretório interno do Freebuff
+.freebuff/
+
+# ATENÇÃO: dados/historico.json deve ser VERSIONADO (o servidor precisa dele)

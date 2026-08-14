@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo do Bicho RJ · Resultados</title>
+  <meta name="description" content="Resultados do Jogo do Bicho do Rio de Janeiro: Deu no Poste de hoje, histórico e busca por milhar, centena, dezena ou bicho.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐒</text></svg>">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="topo-inner">
+      <a class="marca" href="/">
+        <span class="marca-emoji">🐒</span>
+        <span>
+          <strong>Jogo do Bicho RJ</strong>
+          <small>Resultados · Deu no Poste</small>
+        </span>
+      </a>
+      <div class="topo-acoes">
+        <span id="status" class="status">carregando…</span>
+        <a class="btn" href="/diario.html" title="Resultados diários: consulte qualquer dia do arquivo">🗓️ Arquivo diário</a>
+        <button id="btn-atualizar" class="btn" title="Atualizar agora">↻ Atualizar</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="conteudo">
+    <section class="busca-bloco">
+      <h1>Resultados do Jogo do Bicho — Rio de Janeiro</h1>
+      <p class="subtitulo">Apurações do dia e histórico. Busque por milhar (4 dígitos), centena (3), dezena (2), grupo (01–25) ou nome do bicho.</p>
+      <div class="busca">
+        <input id="busca" type="search" placeholder="Ex.: 6465 · 465 · 65 · 17 · macaco" autocomplete="off" spellcheck="false">
+        <button id="btn-limpar" class="btn btn-limpar" title="Limpar busca" hidden>✕</button>
+      </div>
+      <div id="resumo-busca" class="resumo-busca" hidden></div>
+    </section>
+
+    <div id="erro" class="erro" hidden></div>
+
+    <section id="secao-hoje" hidden>
+      <h2 class="secao-titulo">📅 Resultado de hoje <span id="data-hoje" class="data-hoje"></span></h2>
+      <div id="hoje" class="grades"></div>
+    </section>
+
+    <section id="secao-palpites" hidden>
+      <h2 class="secao-titulo">🎯 Palpites do dia — 3 grupos</h2>
+      <div id="palpites" class="palpites"></div>
+      <div id="palpites-rodape" class="palpites-rodape"></div>
+    </section>
+
+    <section id="secao-pessoal" hidden>
+      <h2 class="secao-titulo">🔮 Palpite pessoal (numerologia)</h2>
+      <p class="subtitulo">Com a mesma fórmula do popular <a href="https://www.ojogodobicho.com/palpite.htm" target="_blank" rel="noopener">Palpitômetro</a>: informe sua data de nascimento e veja o bicho, dezena, centena e milhar sugeridos para a próxima apuração.</p>
+      <div class="busca">
+        <input id="nascimento" type="date" min="1900-01-01" max="2026-12-31" title="Data de nascimento">
+      </div>
+      <div id="pessoal-resultado"></div>
+    </section>
+
+    <section id="secao-arquivo" hidden>
+      <h2 class="secao-titulo">🗄️ Histórico completo (2021 → hoje)</h2>
+      <p class="subtitulo" id="arquivo-cobertura"></p>
+      <div class="busca">
+        <input id="busca-arquivo" type="search" placeholder="Buscar no histórico completo: milhar, centena, dezena, grupo ou bicho" autocomplete="off" spellcheck="false">
+      </div>
+      <div id="arquivo-status" class="resumo-busca" hidden></div>
+      <div id="arquivo-lista" class="arquivo-lista"></div>
+    </section>
+
+    <section id="secao-historico" hidden>
+      <h2 class="secao-titulo">🗓️ Últimos dias</h2>
+      <div class="tabela-wrap">
+        <table class="tabela" id="tabela-historico">
+          <thead>
+            <tr>
+              <th>Data</th><th>Horário</th>
+              <th>1º</th><th>2º</th><th>3º</th><th>4º</th><th>5º</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="secao-bichos" hidden>
+      <h2 class="secao-titulo">🐾 Tabela dos Bichos</h2>
+      <div id="bichos" class="bichos"></div>
+    </section>
+
+    <footer class="rodape">
+      <p>Os resultados são as apurações do <strong>Rio de Janeiro</strong> divulgadas pela imprensa e reunidas em <a href="https://www.ojogodobicho.com" target="_blank" rel="noopener">ojogodobicho.com</a>.</p>
+      <p>⚠️ O jogo do bicho <strong>não é regulamentado</strong> no Brasil (proibido por lei federal desde 1946). Este site é apenas informativo — não faz, intermedia nem incentiva apostas.</p>
+    </footer>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
