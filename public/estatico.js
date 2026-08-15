@@ -24,7 +24,7 @@ const estatico = {
   },
   HORARIOS: {
     PPT: "09:30", PTM: "11:30", PT: "14:30", PTV: "16:30",
-    PTN: "18:30", FED: "19:00", COR: "21:30",
+    PTN: "18:20", FED: "20:00", COR: "21:30",
   },
   /* Apurações por dia da semana (0=domingo), em minutos desde a meia-noite —
      mesma grade do Palpitômetro. */

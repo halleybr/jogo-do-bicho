@@ -33,8 +33,8 @@ LOTERIAS = {
     "PTM": ("PT Manhã", "11:30"),
     "PT": ("PT Tarde", "14:30"),
     "PTV": ("PT Vespera", "16:30"),
-    "PTN": ("PT Noite", "18:30"),
-    "FED": ("Federal", "19:00"),
+    "PTN": ("PT Noite", "18:20"),
+    "FED": ("Federal", "20:00"),
     "COR": ("Coruja", "21:30"),
 }
 

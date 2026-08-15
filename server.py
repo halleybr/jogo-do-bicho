@@ -145,8 +145,8 @@ LOTERIAS = {
     "PTM": {"nome": "PT Manhã", "horario": "11:30"},
     "PT": {"nome": "PT Tarde", "horario": "14:30"},
     "PTV": {"nome": "PT Vespera", "horario": "16:30"},
-    "PTN": {"nome": "PT Noite", "horario": "18:30"},
-    "FED": {"nome": "Federal", "horario": "19:00"},
+    "PTN": {"nome": "PT Noite", "horario": "18:20"},
+    "FED": {"nome": "Federal", "horario": "20:00"},
     "COR": {"nome": "Coruja", "horario": "21:30"},
 }
 

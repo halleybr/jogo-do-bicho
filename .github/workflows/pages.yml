@@ -2,10 +2,13 @@ name: Deploy no GitHub Pages
 
 # Publica o site como estático no GitHub Pages. Roda:
 #   1. a cada push na main (inclui o commit diário do histórico);
-#   2. a cada 2 horas (cron em UTC, minutos :45), logo depois das apurações
-#      do dia no horário de Brasília — 09:30, 11:30, 14:30, 16:30, 18:30,
-#      19:00 (FED) e 21:30 (COR) — para os resultados de hoje irem subindo
-#      ao longo do dia (as execuções caem às 21:45, 23:45, 01:45, ... 19:45 BR);
+#   2. no agendamento, 2 minutos depois de cada apuração do dia (horário de
+#      Brasília) — 09:30, 11:30, 14:30, 16:30, 18:20, 20:00 e 21:30. Os
+#      horários abaixo são em UTC (= BR - 3):
+#        - "32 0,12,14,17,19 * * *"  → 09:32, 11:32, 14:32, 16:32 e 21:32 BR
+#        - "22 21 * * *"            → 18:22 BR (após a PTN)
+#        - "2 23 * * *"             → 20:02 BR (após a FED)
+#      (o GitHub pode atrasar a execução em alguns minutos em horários de pico)
 #   3. manualmente pela aba Actions → "Run workflow".
 #
 # Antes do deploy o build baixa os dias novos (historico.py) e gera os
@@ -17,7 +20,9 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "45 */2 * * *"
+    - cron: "32 0,12,14,17,19 * * *"
+    - cron: "22 21 * * *"
+    - cron: "2 23 * * *"
   workflow_dispatch:
 
 permissions:
