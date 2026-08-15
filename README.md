@@ -94,19 +94,20 @@ ausência do backend (`/api/*` devolvendo 404) e usa os JSONs de
 1. Publique o repositório no GitHub e ative o Pages em **Settings → Pages →
    Source: GitHub Actions** (uma única vez).
 2. O workflow `.github/workflows/pages.yml` publica o site a cada push na
-   `main` e também no agendamento, **2 minutos depois de cada apuração** do
-   dia (09:30, 11:30, 14:30, 16:30, 18:20, 20:00 e 21:30, horário de
-   Brasília): ele roda `historico.py` (baixa os dias novos) e
-   `gerar_estatico.py` (gera os JSONs) antes do deploy.
+   `main` e também **busca resultados quase em tempo real**: a cada 2
+   minutos ele rebaixa o dia de hoje (`historico.py`) e só publica quando os
+   dados mudaram em relação ao site atual — assim cada apuração (09:30,
+   11:30, 14:30, 16:30, 18:20, 20:00 e 21:30, horário de Brasília) sobe
+   logo depois que a fonte a publica.
 3. O resultado fica em `https://SEU-USUARIO.github.io/jogo-do-bicho/` (ou no
    seu domínio customizado).
 
 No modo estático o site fica **atrasado em poucos minutos** em relação à
-última apuração (os dados são os do último build — os resultados do dia vão
-subindo ao longo do dia, apuração a apuração; o GitHub pode atrasar a
-execução em alguns minutos em horários de pico), o botão "Atualizar" some e
-o palpite pessoal (numerologia) é calculado no próprio navegador, com a
-mesma fórmula.
+última apuração (o poller roda a cada 2 min e só faz deploy quando há
+resultado novo; o GitHub pode atrasar execuções agendadas em horários de
+pico — há também crons fixos 2 minutos após cada apuração como reforço), o
+botão "Atualizar" some e o palpite pessoal (numerologia) é calculado no
+próprio navegador, com a mesma fórmula.
 A busca no histórico completo e a página diária rodam no navegador sobre o
 `dados/historico.json` (3,7 MB) incluído no deploy.
 

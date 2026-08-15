@@ -2,27 +2,24 @@ name: Deploy no GitHub Pages
 
 # Publica o site como estático no GitHub Pages. Roda:
 #   1. a cada push na main (inclui o commit diário do histórico);
-#   2. no agendamento, 2 minutos depois de cada apuração do dia (horário de
-#      Brasília) — 09:30, 11:30, 14:30, 16:30, 18:20, 20:00 e 21:30. Os
-#      horários abaixo são em UTC (= BR - 3):
-#        - "32 0,12,14,17,19 * * *"  → 09:32, 11:32, 14:32, 16:32 e 21:32 BR
-#        - "22 21 * * *"            → 18:22 BR (após a PTN)
-#        - "2 23 * * *"             → 20:02 BR (após a FED)
-#      (o GitHub pode atrasar a execução em alguns minutos em horários de pico)
+#   2. no agendamento, a cada 2 minutos — busca os resultados quase em
+#      tempo real: rebaixa o dia de hoje (historico.py) e só publica
+#      (upload + deploy) quando os dados mudaram em relação ao site atual,
+#      comparando o historico.json; se nada mudou, o run termina sem deploy;
 #   3. manualmente pela aba Actions → "Run workflow".
 #
-# Antes do deploy o build baixa os dias novos (historico.py) e gera os
-# JSONs estáticos (gerar_estatico.py) que o frontend usa sem backend.
-#
-# IMPORTANTE (uma vez): em Settings → Pages, deixe "Source" em
-# "GitHub Actions" para este workflow publicar o site.
+# A comparação usa o JSON publicado em https://<usuário>.github.io/<repo>/.
+# O GitHub pode atrasar execuções agendadas em horários de pico — por isso
+# também há crons fixos 2 minutos após cada apuração (horário de Brasília:
+# 09:30, 11:30, 14:30, 16:30, 18:20, 20:00 e 21:30) como reforço.
 on:
   push:
     branches: [main]
   schedule:
-    - cron: "32 0,12,14,17,19 * * *"
-    - cron: "22 21 * * *"
-    - cron: "2 23 * * *"
+    - cron: "*/2 * * * *"          # poller a cada 2 minutos
+    - cron: "32 0,12,14,17,19 * * *"  # BR 09:32, 11:32, 14:32, 16:32 e 21:32
+    - cron: "22 21 * * *"          # BR 18:22 (após a PTN)
+    - cron: "2 23 * * *"           # BR 20:02 (após a FED)
   workflow_dispatch:
 
 permissions:
@@ -50,10 +47,37 @@ jobs:
       - name: Gerar JSONs estáticos
         run: python gerar_estatico.py
 
+      - name: Comparar com o site publicado (deploy só se mudou)
+        id: comparar
+        run: |
+          python - <<'EOF'
+          import json, os, urllib.request
+          novo = json.load(open("public/dados/historico.json", encoding="utf-8"))
+          repo = os.environ["GITHUB_REPOSITORY"]  # "dono/repo"
+          dono, nome = repo.split("/", 1)
+          url = f"https://{dono}.github.io/{nome}/dados/historico.json"
+          try:
+              atual = json.load(urllib.request.urlopen(url, timeout=20))
+          except Exception:
+              atual = {}  # site ainda não publicado → publica
+          mudou = novo.get("dias") != atual.get("dias") or \
+                  novo.get("sem_dados") != atual.get("sem_dados")
+          print("mudou:", mudou, "(", url, ")")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"mudou={'true' if mudou else 'false'}\n")
+          EOF
+
+      - name: Sem mudanças — deploy ignorado
+        if: github.event_name == 'schedule' && steps.comparar.outputs.mudou != 'true'
+        run: echo "dados iguais aos do site publicado — nenhum deploy necessário."
+
       - name: Upload do site
+        # push/dispacho manual publica sempre; só o agendamento condiciona
+        if: github.event_name != 'schedule' || steps.comparar.outputs.mudou == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
 
       - name: Deploy no GitHub Pages
+        if: github.event_name != 'schedule' || steps.comparar.outputs.mudou == 'true'
         uses: actions/deploy-pages@v4
