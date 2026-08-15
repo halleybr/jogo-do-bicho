@@ -4,6 +4,7 @@ const $ = (sel) => document.querySelector(sel);
 
 let DADOS = null;
 let busca = "";
+let MODO = null; // "api" (backend Python) ou "estatico" (GitHub Pages)
 
 const el = {
   status: $("#status"),
@@ -230,9 +231,16 @@ const ROTULO_ESTRATEGIA = {
 
 async function carregarPalpites() {
   try {
-    const resp = await fetch("/api/palpites");
-    const dados = await resp.json();
-    if (!resp.ok) throw new Error(dados.erro || "HTTP " + resp.status);
+    let dados;
+    if (MODO === "estatico") {
+      const resp = await fetch("dados/palpites.json");
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      dados = await resp.json();
+    } else {
+      const resp = await fetch("api/palpites");
+      dados = await resp.json();
+      if (!resp.ok) throw new Error(dados.erro || "HTTP " + resp.status);
+    }
     el.secaoPalpites.hidden = false;
     el.palpites.innerHTML = dados.palpites.map((p) => `
       <article class="palpite estr-${escapeHtml(p.estrategia)}">
@@ -286,11 +294,19 @@ async function renderPessoal() {
   const [ano, mes, dia] = v.split("-");
   el.pessoalResultado.innerHTML = `<div class="sem-resultado">Calculando…</div>`;
   try {
-    const resp = await fetch(`/api/palpites?nascimento=${dia}/${mes}/${ano}`);
-    const dados = await resp.json();
-    if (minha !== seqPessoal) return; // resposta antiga — ignora
-    if (!resp.ok) throw new Error(dados.erro || "HTTP " + resp.status);
-    const p = dados.pessoal;
+    let p;
+    if (MODO === "estatico") {
+      // sem backend: mesma fórmula, calculada no navegador (horário do Rio)
+      const agoraRio = new Date(Date.now() - 3 * 3600 * 1000);
+      p = estatico.palpitePessoal(Number(ano), Number(mes), Number(dia), agoraRio);
+      if (minha !== seqPessoal) return; // resposta antiga — ignora
+    } else {
+      const resp = await fetch(`api/palpites?nascimento=${dia}/${mes}/${ano}`);
+      const dados = await resp.json();
+      if (minha !== seqPessoal) return; // resposta antiga — ignora
+      if (!resp.ok) throw new Error(dados.erro || "HTTP " + resp.status);
+      p = dados.pessoal;
+    }
     if (!p || p.erro) throw new Error(p ? p.erro : "sem dados");
     el.pessoalResultado.innerHTML = `
       <div class="pessoal-card">
@@ -334,7 +350,8 @@ async function carregarArquivo() {
     el.arquivoLista.innerHTML = "";
     return;
   }
-  let url = "/api/historico?limite=200";
+  let url = "api/historico?limite=200";
+  const params = { limite: 200 };
   if (analise.tipo === "animal") {
     const g = grupoDeAnimal(analise.q);
     if (!g) {
@@ -344,14 +361,25 @@ async function carregarArquivo() {
       return;
     }
     url += `&grupo=${g}`;
+    params.grupo = g;
   } else {
     url += `&numero=${encodeURIComponent(analise.q)}`;
-    if (analise.grupo !== null) url += `&grupo=${analise.grupo}`;
+    params.numero = analise.q;
+    if (analise.grupo !== null) {
+      url += `&grupo=${analise.grupo}`;
+      params.grupo = analise.grupo;
+    }
   }
   try {
-    const resp = await fetch(url);
-    const dados = await resp.json();
-    if (!resp.ok) throw new Error(dados.erro || "HTTP " + resp.status);
+    let dados;
+    if (MODO === "estatico") {
+      const hist = await estatico.carregarHistorico();
+      dados = estatico.consultarHistorico(hist, params);
+    } else {
+      const resp = await fetch(url);
+      dados = await resp.json();
+      if (!resp.ok) throw new Error(dados.erro || "HTTP " + resp.status);
+    }
     const itens = dados.resultados || [];
     el.arquivoStatus.hidden = false;
     el.arquivoStatus.innerHTML = itens.length
@@ -359,7 +387,7 @@ async function carregarArquivo() {
       : `Nenhum resultado para <b>${escapeHtml(q)}</b> no histórico completo.`;
     el.arquivoLista.innerHTML = itens.map((r) => `
       <div class="arquivo-item">
-        <span class="data"><a href="/diario.html?data=${r.data}" title="Ver o dia completo">${r.data.split("-").reverse().join("/")}</a></span>
+        <span class="data"><a href="diario.html?data=${r.data}" title="Ver o dia completo">${r.data.split("-").reverse().join("/")}</a></span>
         <span class="tipo">${r.loteria}</span>
         <span class="pos">${r.posicao}º</span>
         <span><span class="num">${escapeHtml(r.numero)}</span> <span class="bicho">${r.emoji} ${r.animal} · G${r.grupo}</span></span>
@@ -373,13 +401,25 @@ async function carregarArquivo() {
 async function carregar(forcar = false) {
   el.btnAtualizar.disabled = true;
   try {
-    const resp = await fetch("/api/resultados" + (forcar ? "?forcar=1" : ""));
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
-    const dados = await resp.json();
+    const resp = await fetch("api/resultados" + (forcar ? "?forcar=1" : ""));
+    let dados;
+    if (!resp.ok && !(resp.headers.get("content-type") || "").includes("json")) {
+      // sem backend (ex.: GitHub Pages) — usa os JSONs estáticos gerados
+      MODO = "estatico";
+      const r = await fetch("dados/resultados.json");
+      if (!r.ok) throw new Error("dados/resultados.json não encontrado");
+      dados = await r.json();
+    } else {
+      dados = await resp.json();
+      if (!resp.ok) throw new Error(dados.erro || "HTTP " + resp.status);
+    }
     if (dados.erro) throw new Error(dados.erro);
     DADOS = dados;
     el.erro.hidden = true;
-    if (dados.aviso) {
+    if (MODO === "estatico") {
+      el.status.textContent = "✓ versão estática · gerada às " + tempoAtualizado(dados.raspado_em);
+      el.status.className = "status ok";
+    } else if (dados.aviso) {
       el.status.textContent = "⚠ " + dados.aviso;
       el.status.className = "status erro";
     } else {
@@ -432,8 +472,13 @@ async function iniciar() {
   el.secaoPessoal.hidden = false;
   el.secaoArquivo.hidden = false;
   carregarPalpites();
+  if (MODO === "estatico") {
+    // sem backend não há o que atualizar: esconde o botão e não agenda refresh
+    el.btnAtualizar.hidden = true;
+  } else {
+    setInterval(() => carregar(false), 5 * 60 * 1000);
+    setInterval(carregarPalpites, 10 * 60 * 1000);
+  }
 }
 
 iniciar();
-setInterval(() => carregar(false), 5 * 60 * 1000);
-setInterval(carregarPalpites, 10 * 60 * 1000);

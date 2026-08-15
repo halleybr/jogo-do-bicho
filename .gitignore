@@ -10,3 +10,6 @@ __pycache__/
 .freebuff/
 
 # ATENÇÃO: dados/historico.json deve ser VERSIONADO (o servidor precisa dele)
+
+# JSONs estáticos gerados pelo gerar_estatico.py (o workflow do Pages os gera)
+public/dados/

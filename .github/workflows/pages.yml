@@ -1,0 +1,52 @@
+name: Deploy no GitHub Pages
+
+# Publica o site como estático no GitHub Pages. Roda:
+#   1. a cada push na main (inclui o commit diário do histórico);
+#   2. todo dia às 03:10 UTC (00:10 Brasília), cobrindo dias em que o
+#      workflow de histórico não rodou;
+#   3. manualmente pela aba Actions → "Run workflow".
+#
+# Antes do deploy o build baixa os dias novos (historico.py) e gera os
+# JSONs estáticos (gerar_estatico.py) que o frontend usa sem backend.
+#
+# IMPORTANTE (uma vez): em Settings → Pages, deixe "Source" em
+# "GitHub Actions" para este workflow publicar o site.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "10 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Baixar dias novos (incremental)
+        run: python historico.py
+
+      - name: Gerar JSONs estáticos
+        run: python gerar_estatico.py
+
+      - name: Upload do site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy no GitHub Pages
+        uses: actions/deploy-pages@v4

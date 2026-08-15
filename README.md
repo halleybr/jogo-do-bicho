@@ -68,19 +68,47 @@ python server.py             # sobe o site em http://127.0.0.1:8000
 server.py            servidor HTTP + raspador do dia + API (resultados, palpites, histórico, diário)
 historico.py         downloader/parser do histórico 2021→hoje (incremental)
 palpites.py          motor estatístico + palpite pessoal (fórmula do Palpitômetro)
+gerar_estatico.py    gera os JSONs para o modo estático (public/dados/) — usado pelo workflow do Pages
 dados/historico.json cache do histórico (gerado pelo historico.py)
 public/index.html    página principal (hoje, palpites, busca, tabela dos bichos)
 public/diario.html   página de resultados diários
+public/estatico.js   modo estático: emula /api/historico e /api/diario no navegador + numerologia local
 public/diario.js     lógica da página diária (navegação + busca no dia)
 public/style.css     estilos
 public/app.js        busca, palpites, histórico, atualização automática
 ```
 
+> Para testar o modo estático localmente: `python gerar_estatico.py` e depois
+> `cd public && python -m http.server 8000` (sem rodar o `server.py`).
+
 ## Publicando na internet
 
-O site **precisa de um servidor que rode Python** (ele raspa os resultados e
-serve a API) — não dá para publicar como site estático (GitHub Pages, Netlify
-etc.). Opções gratuitas/simples:
+O site tem dois modos: **com backend** (Render/Railway/PythonAnywhere/VPS),
+com resultados em tempo real raspados do ojogodobicho.com; e **estático**
+(GitHub Pages), com os dados gerados uma vez por dia — o frontend detecta a
+ausência do backend (`/api/*` devolvendo 404) e usa os JSONs de
+`public/dados/` gerados pelo `gerar_estatico.py`.
+
+### GitHub Pages (gratuito, sem servidor)
+
+1. Publique o repositório no GitHub e ative o Pages em **Settings → Pages →
+   Source: GitHub Actions** (uma única vez).
+2. O workflow `.github/workflows/pages.yml` publica o site a cada push na
+   `main` e também todo dia de madrugada: ele roda `historico.py` (baixa os
+   dias novos) e `gerar_estatico.py` (gera os JSONs) antes do deploy.
+3. O resultado fica em `https://SEU-USUARIO.github.io/jogo-do-bicho/` (ou no
+   seu domínio customizado).
+
+No modo estático o site fica **atrasado em até ~1 dia** em relação à última
+apuração (os dados são os do último build), o botão "Atualizar" some e o
+palpite pessoal (numerologia) é calculado no próprio navegador, com a mesma
+fórmula. A busca no histórico completo e a página diária rodam no navegador
+sobre o `dados/historico.json` (3,7 MB) incluído no deploy.
+
+### Com backend (resultados em tempo real)
+
+O modo completo **precisa de um servidor que rode Python** (ele raspa os
+resultados e serve a API). Opções gratuitas/simples:
 
 1. **Render** ([render.com](https://render.com), free tier) ou **Railway** —
    conecte o repositório Git e o serviço detecta o `server.py`; defina:

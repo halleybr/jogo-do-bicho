@@ -146,14 +146,21 @@ let seqDia = 0;
 
 async function carregarDia(data) {
   const meu = ++seqDia;
-  const url = data ? `/api/diario?data=${encodeURIComponent(data)}` : "/api/diario";
+  const url = data ? `api/diario?data=${encodeURIComponent(data)}` : "api/diario";
   el.erro.hidden = true;
   el.grades.innerHTML = "";
   el.titulo.textContent = "Carregando…";
   try {
+    let dados;
     const resp = await fetch(url);
-    const dados = await resp.json();
-    if (!resp.ok) throw new Error(dados.erro || "HTTP " + resp.status);
+    if (!resp.ok && !(resp.headers.get("content-type") || "").includes("json")) {
+      // sem backend (ex.: GitHub Pages) — emula a rota a partir do arquivo
+      const hist = await estatico.carregarHistorico();
+      dados = estatico.consultarDiario(hist, data || estatico.ultimoDia(hist));
+    } else {
+      dados = await resp.json();
+      if (!resp.ok) throw new Error(dados.erro || "HTTP " + resp.status);
+    }
     if (meu !== seqDia) return; // resposta antiga
     estado = dados;
     el.data.value = dados.data;
@@ -168,9 +175,9 @@ async function carregarDia(data) {
       semDados(dados, false);
     }
   } catch (e) {
-    if (e.message.includes("fora do arquivo") && estado) {
+    if (e.message.includes("fora do arquivo") && (estado || e.inicio)) {
       mostrarErro(e.message);
-      semDados({ data, inicio: estado.inicio, fim: estado.fim }, true);
+      semDados({ data, inicio: e.inicio || estado.inicio, fim: e.fim || estado.fim }, true);
     } else {
       mostrarErro("Não foi possível carregar o dia: " + e.message);
     }
