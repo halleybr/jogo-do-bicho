@@ -94,7 +94,7 @@ ausência do backend (`/api/*` devolvendo 404) e usa os JSONs de
 1. Publique o repositório no GitHub e ative o Pages em **Settings → Pages →
    Source: GitHub Actions** (uma única vez).
 2. O workflow `.github/workflows/pages.yml` publica o site a cada push na
-   `main` e também **busca resultados quase em tempo real**: a cada 2
+   `main` e também **busca resultados quase em tempo real**: a cada 5
    minutos ele rebaixa o dia de hoje (`historico.py`) e só publica quando os
    dados mudaram em relação ao site atual — assim cada apuração (09:30,
    11:30, 14:30, 16:30, 18:20, 20:00 e 21:30, horário de Brasília) sobe
@@ -103,11 +103,11 @@ ausência do backend (`/api/*` devolvendo 404) e usa os JSONs de
    seu domínio customizado).
 
 No modo estático o site fica **atrasado em poucos minutos** em relação à
-última apuração (o poller roda a cada 2 min e só faz deploy quando há
-resultado novo; o GitHub pode atrasar execuções agendadas em horários de
-pico — há também crons fixos 2 minutos após cada apuração como reforço), o
-botão "Atualizar" some e o palpite pessoal (numerologia) é calculado no
-próprio navegador, com a mesma fórmula.
+última apuração (o poller roda a cada 5 min — mínimo do GitHub Actions — e
+só faz deploy quando há resultado novo; o GitHub pode atrasar execuções
+agendadas em horários de pico — há também crons fixos 2 minutos após cada
+apuração como reforço), o botão "Atualizar" some e o palpite pessoal
+(numerologia) é calculado no próprio navegador, com a mesma fórmula.
 A busca no histórico completo e a página diária rodam no navegador sobre o
 `dados/historico.json` (3,7 MB) incluído no deploy.
 

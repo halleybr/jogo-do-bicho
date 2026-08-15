@@ -2,10 +2,11 @@ name: Deploy no GitHub Pages
 
 # Publica o site como estático no GitHub Pages. Roda:
 #   1. a cada push na main (inclui o commit diário do histórico);
-#   2. no agendamento, a cada 2 minutos — busca os resultados quase em
-#      tempo real: rebaixa o dia de hoje (historico.py) e só publica
-#      (upload + deploy) quando os dados mudaram em relação ao site atual,
-#      comparando o historico.json; se nada mudou, o run termina sem deploy;
+#   2. no agendamento, a cada 5 minutos (mínimo permitido pelo GitHub
+#      Actions) — busca os resultados quase em tempo real: rebaixa o dia de
+#      hoje (historico.py) e só publica (upload + deploy) quando os dados
+#      mudaram em relação ao site atual, comparando o historico.json; se
+#      nada mudou, o run termina sem deploy;
 #   3. manualmente pela aba Actions → "Run workflow".
 #
 # A comparação usa o JSON publicado em https://<usuário>.github.io/<repo>/.
@@ -16,7 +17,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "*/2 * * * *"          # poller a cada 2 minutos
+    - cron: "*/5 * * * *"          # poller a cada 5 minutos
     - cron: "32 0,12,14,17,19 * * *"  # BR 09:32, 11:32, 14:32, 16:32 e 21:32
     - cron: "22 21 * * *"          # BR 18:22 (após a PTN)
     - cron: "2 23 * * *"           # BR 20:02 (após a FED)
