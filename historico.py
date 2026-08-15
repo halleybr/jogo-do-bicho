@@ -201,7 +201,13 @@ def baixar_incremental(workers=5):
     d = INICIO
     while d <= hoje:
         chave = d.isoformat()
-        if chave not in dias and (chave not in sem_dados or d >= limite_retry):
+        if d == hoje:
+            # O dia de hoje é sempre (re)baixado: a fonte publica as apurações
+            # ao longo do dia (PPT 09:30 → COR 21:30), então o arquivo precisa
+            # acompanhar — as execuções do Pages a cada 2h vão preenchendo os
+            # resultados do dia (o arquivo guarda a versão mais recente).
+            pendentes.append(d)
+        elif chave not in dias and (chave not in sem_dados or d >= limite_retry):
             pendentes.append(d)
         d += timedelta(days=1)
     print(f"pendentes: {len(pendentes)} dias ({INICIO} → {hoje})")
